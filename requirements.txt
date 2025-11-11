@@ -1,0 +1,8 @@
+paddleocr
+opencv-python-headless
+pandas
+numpy
+openpyxl
+tqdm
+PyYAML
+matplotlib
