@@ -1,0 +1,7 @@
+input_dir: data/sample/input
+output_dir: outputs
+ocr:
+  engine: paddleocr
+  lang: en
+export:
+  excel_filename: results.xlsx
