@@ -59,9 +59,15 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
         return [{"text": "?", "score": 0.0} for _ in rois]
 
     for out in ocr_results:
-        text = out.get("rec_texts", ["?"])[0]
-        score = out.get("rec_scores", [0.0])[0]
-        results.append({"text": text, "score": float(score)})
+        
+        texts = out.get("rec_texts", ["?"])
+        scores = out.get("rec_scores", [0.0])
+
+        # --- распаковка ---
+        text = texts[0] if texts else "?"
+        score = scores[0] if scores else 0.0
+
+        results.append({"text": text, "score": round(score, 2)})
 
     return results
 
