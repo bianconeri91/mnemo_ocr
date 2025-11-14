@@ -14,4 +14,3 @@ colors:
 
 export:
   excel_filename: "ocr_results.xlsx"
->>>>>>> e710af8 (Update project structure, add pipeline and tests)
