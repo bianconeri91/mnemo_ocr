@@ -36,8 +36,7 @@ def ocr_title(img: np.ndarray) -> str:
 # OCR датчиков (PaddleOCR)
 # --------------------------
 paddle_ocr = PaddleOCR(
-    lang="en",
-    use_textline_orientation=True
+    lang="en"
 )
 
 
