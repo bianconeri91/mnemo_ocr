@@ -8,7 +8,6 @@ tqdm==4.67.1
 # OCR stack
 paddleocr==3.0.0
 paddlepaddle==2.6.2
-paddlex==2.1.1
 pytesseract==0.3.10
 
 # Optional
