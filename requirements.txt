@@ -8,3 +8,4 @@ PyYAML
 matplotlib
 python-docx
 pytesseract
+paddleocr
