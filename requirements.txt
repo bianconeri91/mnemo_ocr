@@ -5,9 +5,10 @@ opencv-python-headless==4.10.0.84
 scikit-image==0.25.2
 tqdm==4.67.1
 
-# PaddleOCR stack
+# OCR stack
 paddleocr==3.2.0
 paddlepaddle==2.6.1
+pytesseract==0.3.10
 
 # Optional
 python-docx==1.2.0
