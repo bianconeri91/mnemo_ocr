@@ -37,9 +37,7 @@ def ocr_title(img: np.ndarray) -> str:
 # --------------------------
 paddle_ocr = PaddleOCR(
     lang="en",
-    use_angle_cls=False,
-    det=False,
-    rec=False
+    use_gpu=False
 )
 
 
