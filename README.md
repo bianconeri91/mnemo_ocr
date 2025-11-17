@@ -2,7 +2,7 @@
 title: MNEMO OCR Demo
 emoji: 🔍
 colorFrom: purple
-colorTo: orange
+colorTo: gray
 sdk: gradio
 sdk_version: 3.41.2
 app_file: app.py
