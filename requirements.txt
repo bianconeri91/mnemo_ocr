@@ -1,17 +1,13 @@
---no-binary=opencv-python
---no-binary=opencv-contrib-python
-
 numpy==1.26.4
 pandas==2.2.3
 pillow==10.4.0
 
 opencv-python-headless==4.7.0.72
-opencv-python==4.7.0.72
 
 scikit-image==0.25.2
 
 paddlepaddle==2.6.1
-paddleocr==2.7.3
+paddleocr==2.6.1
 
 pytesseract==0.3.10
 python-docx==1.2.0
