@@ -1,14 +1,12 @@
 ---
-title: "MNEMO OCR Demo"
-emoji: "📄"
-colorFrom: "blue"
-colorTo: "purple"
+title: MNEMO OCR Demo
+emoji: 🔍
+colorFrom: purple
+colorTo: orange
 sdk: gradio
-sdk_version: "4.37.2"
+sdk_version: 3.41.2
 app_file: app.py
 pinned: false
 ---
 
-# MNEMO OCR Demo
-
-Upload an image and extract text using PaddleOCR.
+MNEMO OCR – simple OCR demo using PaddleOCR.
