@@ -9,7 +9,7 @@ from pathlib import Path
 from docx import Document
 
 from src.config_loader import load_config
-from src.ocr_utils import ocr_title, ocr_sensors
+from src.ocr_utils_demo import ocr_title, ocr_sensors
 
 
 # ---------------------------------------------------------
