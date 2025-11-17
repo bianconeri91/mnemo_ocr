@@ -50,7 +50,7 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
     results = []
 
     if not rois:
-        return []
+        return results
 
     for roi in rois:
         try:
@@ -59,15 +59,16 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
             results.append({"text": "?", "score": 0.0})
             continue
 
-    if ocr_results and ocr_results[0]:
-        text, score = ocr_results[0][0][1]
-    else:
-        text, score = "?", 0.0
+        if not ocr_results or not ocr_results[0]:
+            results.append({"text": "?", "score": 0.0})
+            continue
 
-    results.append({
-        "text": text,
-        "score": float(score)
-    })
+        text, score = ocr_results[0][1]
+        
+        results.append({
+            "text": text,
+            "score": float(score)
+        })
     
     return results
 
