@@ -1,87 +1,41 @@
-import streamlit as st
+import gradio as gr
+from paddleocr import PaddleOCR
+from PIL import Image
 import numpy as np
-import cv2
-import pandas as pd
-from pathlib import Path
 
-from src.config_loader import load_config
-from src.pipeline import extract_text
-from src.docx_reader import docx_to_images
+# Инициализируем OCR один раз
+ocr = PaddleOCR(
+    use_angle_cls=True,
+    lang='en'  # если нужно rus — скажи
+)
 
-st.set_page_config(page_title="Mnemo OCR Demo", layout="wide")
-st.title("🧠 Mnemo OCR — демонстрация")
+def run_ocr(image):
+    if image is None:
+        return "No image uploaded."
 
-CONFIG_PATH = Path("configs/config.yaml")
-cfg = load_config(CONFIG_PATH)
-color_ranges = cfg["colors"]
+    # Конвертируем PIL → numpy
+    img = np.array(image)
 
-uploaded = st.file_uploader("Загрузите PNG/JPG/DOCX файл", type=["png", "jpg", "jpeg", "docx"])
+    # Запуск OCR
+    result = ocr.ocr(img)
 
-if not uploaded:
-    st.info("Загрузите изображение или DOCX-файл.")
-    st.stop()
+    # Формируем вывод текстом
+    lines = []
+    for block in result:
+        for line in block:
+            text = line[1][0]
+            conf = line[1][1]
+            lines.append(f"{text} (conf: {conf:.2f})")
 
-filename = uploaded.name.lower()
+    return "\n".join(lines)
 
-# ---- DOCX ----
-if filename.endswith(".docx"):
-    st.subheader("Документ DOCX")
+demo = gr.Interface(
+    fn=run_ocr,
+    inputs=gr.Image(type="pil"),
+    outputs=gr.Textbox(label="Recognized Text"),
+    title="MNEMO OCR Demo",
+    description="Upload an image and extract text using PaddleOCR.",
+)
 
-    try:
-        images = docx_to_images(uploaded)
-    except Exception as e:
-        st.error(f"⚠ DOCX нельзя обработать в этой среде.\n{e}")
-        st.stop()
-
-    st.write("Обнаружено страниц:", len(images))
-
-    results_all = []
-
-    for idx, page in enumerate(images):
-        st.write(f"### Страница {idx+1}")
-
-        img = cv2.cvtColor(np.array(page), cv2.COLOR_RGB2BGR)
-
-        with st.spinner("OCR..."):
-            title_text, sensors = extract_text(img, color_ranges)
-
-        st.write("**Титул:**", title_text)
-
-        if sensors:
-            df = pd.DataFrame(sensors)
-            st.dataframe(df)
-            results_all.append(df)
-        else:
-            st.info("Сенсоры не найдены.")
-
-    if results_all:
-        df_total = pd.concat(results_all, ignore_index=True)
-        st.download_button("Скачать CSV", df_total.to_csv(index=False).encode(), "result.csv", "text/csv")
-
-    st.stop()
-
-# ---- PNG/JPG ----
-else:
-    file_bytes = np.frombuffer(uploaded.read(), np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-    st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), use_column_width=True)
-
-    with st.spinner("OCR..."):
-        title_text, sensors = extract_text(img, color_ranges)
-
-    st.write("### Титул")
-    st.write(title_text)
-
-    st.write("### Сенсоры")
-    if sensors:
-        df = pd.DataFrame(sensors)
-        st.dataframe(df)
-        st.download_button(
-            "Скачать CSV",
-            df.to_csv(index=False).encode(),
-            "sensors.csv",
-            "text/csv"
-        )
-    else:
-        st.info("Сенсоры не найдены.")
+if __name__ == "__main__":
+    demo.launch()
