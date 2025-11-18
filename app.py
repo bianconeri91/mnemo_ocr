@@ -36,6 +36,7 @@ def hf_process(img):
     boxed = draw_boxes(img, sensors)
 
     # --- DataFrame сенсоров ---
+    print("SENSORS:", sensors)
     df = pd.DataFrame(sensors)[["text", "score", "x", "y", "w", "h"]]
 
     # --- Excel на скачивание ---
