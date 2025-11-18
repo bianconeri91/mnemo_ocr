@@ -69,15 +69,24 @@ def ocr_sensors(rois: list[np.ndarray]):
             results.append({"text": "?", "score": 0.0})
             continue
 
-        if not ocr_res or not ocr_res[0]:
+        # -------- Безопасная распаковка --------
+        if (
+            not ocr_res
+            or not isinstance(ocr_res, list)
+            or not ocr_res[0]
+            or not isinstance(ocr_res[0], list)
+            or not ocr_res[0][0]
+            or not isinstance(ocr_res[0][0], tuple)
+            or len(ocr_res[0][0]) < 2
+        ):
             results.append({"text": "?", "score": 0.0})
             continue
         
-        text, score = ocr_res[0][1]
+        text, score = ocr_res[0][0]
 
         results.append({
-            "text": text,
-            "score": float(score)
+            "text": text if text else "?",
+            "score": float(score) if score else 0.0
         })
 
     return results
