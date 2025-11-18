@@ -16,9 +16,11 @@ def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config
     cfg = load_config(cfg_path)
 
     # Цветовые диапазоны сенсоров
+    color_ranges_cfg = cfg["colors"]
+
     color_ranges = []
 
-    for key, rng in color_ranges.items():
+    for key, rng in color_ranges_cfg.items():
         lo = np.array(rng["from"], dtype=np.uint8)
         hi = np.array(rng["to"], dtype=np.uint8)
         color_ranges.append((lo, hi))
