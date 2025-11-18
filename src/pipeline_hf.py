@@ -39,6 +39,9 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
         print("Contour bbox:", x, y, ww, hh) # для отладки
         if ww < 90 or hh < 17:
             continue
+        if hh / ww > 1.5:
+            continue
+
         print("ROI accepted:", ww, hh) # для отладки
         hh_clamped = min(hh, 17)
         roi = img[y:y + hh_clamped, x:x + ww]
@@ -50,11 +53,12 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
     sensors = []
     if rois:
         ocr_results = ocr_sensors(rois)
+        print(ocr_results) # для отладки
 
-        for (x, y, ww, hh), r in zip(positions, ocr_results):
+        for (x, y, ww, hh), result in zip(positions, ocr_results):
             sensors.append({
-                "text": r["text"],
-                "score": r["score"],
+                "text": result[0],
+                "score": result[1],
                 "x": x,
                 "y": y,
                 "w": ww,
