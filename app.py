@@ -25,18 +25,18 @@ def draw_boxes(img_rgb, sensors):
 # ================================
 # Основная функция демо
 # ================================
-def hf_process(img_rgb):
+def hf_process(img):
 
     cfg = load_config("configs/config.yaml")
 
     # Запуск пайплайна
-    result = process_single_image(img_rgb, cfg_path="configs/config.yaml")
+    result = process_single_image(img)
 
     title = result["title"]
     sensors = result["sensors"]
 
     # --- визуализация сенсоров ---
-    boxed = draw_boxes(img_rgb, sensors)
+    boxed = draw_boxes(img, sensors)
 
     # --- DataFrame сенсоров ---
     df = pd.DataFrame(sensors)[["text", "score", "x", "y", "w", "h"]]
