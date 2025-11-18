@@ -5,16 +5,20 @@ OCR-инструменты: pytesseract для титула и PaddleOCR для 
 import cv2
 import numpy as np
 from paddleocr import PaddleOCR
-import pytesseract
+import easyocr
 
+
+# Инициализация EasyOCR
+_reader_title = easyocr.Reader(['en'], gpu=False)
 
 # --------------------------
-# OCR титула (pytesseract)
+# OCR титула (EasyOCR)
 # --------------------------
 def ocr_title(img: np.ndarray) -> str:
     """
     OCR верхней области (титул мнемосхемы).
     """
+    
     if img is None or img.size == 0:
         return ""
 
@@ -28,8 +32,12 @@ def ocr_title(img: np.ndarray) -> str:
         15, 9
     )
 
-    text = pytesseract.image_to_string(binary, lang="eng", config="--psm 7").strip()
-    return text
+    results = _reader_title.readtext(binary, detail=0, paragraph=False)
+
+    if not results:
+        return "Титул не оцифрован"
+
+    return results[0].strip()
 
 
 # --------------------------
