@@ -30,10 +30,7 @@ def hf_process(img):
     cfg = load_config("configs/config.yaml")
 
     # Запуск пайплайна
-    result = process_single_image(img, color_ranges=cfg["colors"])
-
-    title = result["title"]
-    sensors = result["sensors"]
+    title, sensors = process_single_image(img, color_ranges=cfg["colors"])
 
     # --- визуализация сенсоров ---
     boxed = draw_boxes(img, sensors)
