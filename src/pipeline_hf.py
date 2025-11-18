@@ -50,12 +50,12 @@ def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config
         if ww < 90 or hh < 17:
             continue
 
-        hh_clamped = min(hh, 17)
+        #hh_clamped = min(hh, 17)
 
-        roi = img_bgr[y:y + hh_clamped, x:x + ww]
+        roi = img_bgr[y:y + hh, x:x + ww]
 
         rois.append(roi)
-        positions.append((x, y, ww, hh_clamped))
+        positions.append((x, y, ww, hh))
 
     # ---------- 3. OCR сенсоров ----------
     sensors = []
