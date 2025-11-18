@@ -53,7 +53,6 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
     sensors = []
     if rois:
         ocr_results = ocr_sensors(rois)
-        print(ocr_results) # для отладки
 
         for (x, y, ww, hh), result in zip(positions, ocr_results):
             sensors.append({
