@@ -25,12 +25,21 @@ def draw_boxes(img_rgb, sensors):
 # ================================
 # Основная функция демо
 # ================================
-def hf_process(img):
+def hf_process(file):
 
     cfg = load_config("configs/config.yaml")
     
     # Имя файла (если доступно)
-    filename = getattr(img, "name", "uploaded_image.png")
+    if hasattr(file, "name"):
+        file_path = file.name
+    else:
+        file_path = file # Если пришла строка
+
+    filename = Path(file_path).name
+
+    img = cv2.imread(file_path)
+    if img is None:
+        raise ValueError("Не удалось прочитать изображение")
 
     # Запуск пайплайна
     title, sensors = process_single_image(img, color_ranges=cfg["colors"])
@@ -70,7 +79,7 @@ def hf_process(img):
 # ================================
 demo = gr.Interface(
     fn=hf_process,
-    inputs=gr.Image(type="numpy", label="Upload image"),
+    inputs=gr.File(label="Upload image"),
     outputs=[
         gr.Image(label="Detected sensors"),
         gr.Textbox(label="Title"),

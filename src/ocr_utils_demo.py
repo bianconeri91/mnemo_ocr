@@ -85,7 +85,7 @@ def ocr_sensors(rois: list[np.ndarray]):
 
         results.append({
             "text": text if text else "?",
-            "score": float(score) if score else 0.0
+            "score": round(float(score), 2) if score else 0.0
         })
 
     return results
