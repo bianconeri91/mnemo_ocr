@@ -42,6 +42,7 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
         roi = img[y:y + hh_clamped, x:x + ww]
         rois.append(roi)
         positions.append((x, y, ww, hh))
+        print(rois) # для отладки
 
     # ---------- 3. OCR сенсоров ----------
     sensors = []
@@ -78,7 +79,7 @@ def process_image_to_excel(cfg: dict):
     for img_path in input_dir.glob("*.png"):
         name = img_path.name
         img = cv2.imread(str(img_path))
-        
+
         if img is None:
             print(f"Не могу прочитать файл {name}")
             continue
