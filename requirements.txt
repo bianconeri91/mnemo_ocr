@@ -1,7 +1,7 @@
-numpy==1.23.5
+numpy==1.26.4
 pandas==2.2.3
 pillow==10.4.0
-opencv-python-headless==4.7.0.72
+opencv-python-headless==4.9.0.80
 
 paddlepaddle==2.6.1
 paddleocr==2.6.1.0
@@ -10,4 +10,4 @@ gradio==3.41.2
 pyyaml==6.0.2
 openpyxl==3.1.5
 
-easyocr
+easyocr==1.7.1
