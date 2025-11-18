@@ -55,17 +55,23 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
     Формат вывода:
         [{"text": str, "score": float}, ...]
     """
-    results = []
+    ocr_results = []
+    rois = []
 
     if not rois:
         return results
 
-    try:
-        ocr_results = paddle_ocr.ocr(rois)
-        print(ocr_results) # для отладки
-    except Exception as e:
-        print(f"⚠ Ошибка OCR.predict: {e}")
-        return [{"text": "?", "score": 0.0} for _ in rois]
+    for roi in rois:
+        try:
+            ocr_result = paddle_ocr.ocr(roi)
+        except Exception as e:
+            print(f"⚠ Ошибка OCR.ocr: {e}")
+            return [{"text": "?", "score": 0.0} for _ in rois]
+    ocr_results.append(ocr_result)
+
+    return ocr_results
+
+"""
 
     for out in ocr_results:
         
@@ -77,5 +83,4 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
         score = scores[0] if scores else 0.0
 
         results.append({"text": text, "score": round(score, 2)})
-
-    return results
+"""
