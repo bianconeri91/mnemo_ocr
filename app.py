@@ -1,40 +1,72 @@
 import gradio as gr
-from paddleocr import PaddleOCR
-from PIL import Image
 import numpy as np
+import cv2
+import pandas as pd
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
-# Инициализируем OCR один раз
-ocr = PaddleOCR(
-    use_angle_cls=True,
-    lang='en'  # если нужно rus — скажи
-)
+from src.pipeline_hf import process_single_image
+from src.config_loader import load_config
 
-def run_ocr(image):
-    if image is None:
-        return "No image uploaded."
 
-    # Конвертируем PIL → numpy
-    img = np.array(image)
+# ================================
+# Вспомогательная функция: подсветка сенсоров
+# ================================
+def draw_boxes(img_rgb, sensors):
+    img = img_rgb.copy()
 
-    # Запуск OCR
-    result = ocr.ocr(img)
+    for s in sensors:
+        x, y, w, h = s["x"], s["y"], s["w"], s["h"]
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    # Формируем вывод текстом
-    lines = []
-    for block in result:
-        for line in block:
-            text = line[1][0]
-            conf = line[1][1]
-            lines.append(f"{text} (conf: {conf:.2f})")
+    return img
 
-    return "\n".join(lines)
 
+# ================================
+# Основная функция демо
+# ================================
+def hf_process(img_rgb):
+
+    cfg = load_config("configs/config.yaml")
+
+    # Запуск пайплайна
+    result = process_single_image(img_rgb, cfg_path="configs/config.yaml")
+
+    title = result["title"]
+    sensors = result["sensors"]
+
+    # --- визуализация сенсоров ---
+    boxed = draw_boxes(img_rgb, sensors)
+
+    # --- DataFrame сенсоров ---
+    df = pd.DataFrame(sensors)[["text", "score", "x", "y", "w", "h"]]
+
+    # --- Excel на скачивание ---
+    tmp = NamedTemporaryFile(delete=False, suffix=".xlsx")
+    df.to_excel(tmp.name, index=False)
+
+    return (
+        boxed,
+        title,
+        df,
+        tmp.name  # путь к скачиваемому файлу
+    )
+
+
+# ================================
+# Gradio UI
+# ================================
 demo = gr.Interface(
-    fn=run_ocr,
-    inputs=gr.Image(type="pil"),
-    outputs=gr.Textbox(label="Recognized Text"),
-    title="MNEMO OCR Demo",
-    description="Upload an image and extract text using PaddleOCR.",
+    fn=hf_process,
+    inputs=gr.Image(type="numpy", label="Upload image"),
+    outputs=[
+        gr.Image(label="Detected sensors"),
+        gr.Textbox(label="Title"),
+        gr.Dataframe(label="Recognized sensors"),
+        gr.File(label="Download Excel")
+    ],
+    title="MNEMO OCR — HF Demo",
+    description="Продовая демо-версия оцифровщика MNEMO."
 )
 
 if __name__ == "__main__":
