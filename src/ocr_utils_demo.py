@@ -63,7 +63,6 @@ def ocr_sensors(rois: list[np.ndarray]):
     for roi in rois:
         try:
             ocr_res = paddle_ocr.ocr(roi, det=False, cls=False)
-            print(f"Результат оцифровки: {ocr_res}") # для отладки
         except Exception as e:
             print(f"⚠ Ошибка OCR.ocr: {e}")
             results.append({"text": "?", "score": 0.0})
@@ -90,17 +89,3 @@ def ocr_sensors(rois: list[np.ndarray]):
         })
 
     return results
-
-"""
-
-    for out in ocr_results:
-        
-        texts = out.get("rec_texts", ["?"])
-        scores = out.get("rec_scores", [0.0])
-
-        # --- распаковка ---
-        text = texts[0] if texts else "?"
-        score = scores[0] if scores else 0.0
-
-        results.append({"text": text, "score": round(score, 2)})
-"""

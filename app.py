@@ -28,6 +28,9 @@ def draw_boxes(img_rgb, sensors):
 def hf_process(img):
 
     cfg = load_config("configs/config.yaml")
+    
+    # Имя файла (если доступно)
+    filename = getattr(img, "name", "uploaded_image.png")
 
     # Запуск пайплайна
     title, sensors = process_single_image(img, color_ranges=cfg["colors"])
@@ -36,8 +39,19 @@ def hf_process(img):
     boxed = draw_boxes(img, sensors)
 
     # --- DataFrame сенсоров ---
-    print("SENSORS:", sensors)
-    df = pd.DataFrame(sensors)[["text", "score", "x", "y", "w", "h"]]
+    df = pd.DataFrame([
+        {
+            "filename": filename,
+            "title": title,
+            "text": s["text"],
+            "score": s["score"],
+            "x": s["x"],
+            "y": s["y"],
+            "w": s["w"],
+            "h": s["h"]
+        }
+        for s in sensors
+    ])
 
     # --- Excel на скачивание ---
     tmp = NamedTemporaryFile(delete=False, suffix=".xlsx")
@@ -46,8 +60,8 @@ def hf_process(img):
     return (
         boxed,
         title,
-        df,
-        tmp.name  # путь к скачиваемому файлу
+        tmp.name,  # путь к скачиваемому файлу
+        df
     )
 
 
