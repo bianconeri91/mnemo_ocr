@@ -6,39 +6,27 @@ from pathlib import Path
 from src.config_loader import load_config
 from src.ocr_utils_demo import ocr_title, ocr_sensors
 
-def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config.yaml"):
+def process_single_image(img: np.ndarray, color_ranges: dict):
     """
     Обрабатывает одно изображение:
     - вытаскивает титул;
     - находит и оцифровывает сенсоры;
     - возвращает структуру с результатом.
     """
-    cfg = load_config(cfg_path)
-
-    # Цветовые диапазоны сенсоров
-    color_ranges_cfg = cfg["colors"]
-
-    color_ranges = []
-
-    for key, rng in color_ranges_cfg.items():
-        lo = np.array(rng[0], dtype=np.uint8)
-        hi = np.array(rng[1], dtype=np.uint8)
-        color_ranges.append((lo, hi))
 
     # ---------- 1. Оцифровка титула ----------
     h, w = img.shape[:2]
-
-    img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-    title_roi = img_bgr[:45, :int(w / 2.4)]
+    title_roi = img[:45, :int(w / 2.4)]
     title_text = ocr_title(title_roi)
 
     # ---------- 2. Оцифровка сенсоров ----------
-    hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     mask = None
 
-    for lo_np, hi_np in color_ranges:
+    for (lo, hi) in color_ranges.values():
+        lo_np = np.array(lo, dtype=np.uint8)
+        hi_np = np.array(hi, dtype=np.uint8)
         cur = cv2.inRange(hsv, lo_np, hi_np)
         mask = cur if mask is None else cv2.bitwise_or(mask, cur)
 
@@ -50,10 +38,8 @@ def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config
         if ww < 90 or hh < 17:
             continue
 
-        #hh_clamped = min(hh, 17)
-
-        roi = img_bgr[y:y + hh, x:x + ww]
-
+        hh_clamped = min(hh, 17)
+        roi = img[y:y + hh_clamped, x:x + ww]
         rois.append(roi)
         positions.append((x, y, ww, hh))
 
@@ -72,11 +58,7 @@ def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config
                 "h": hh
             })
 
-    return {
-        "title": title_text,
-        "sensors": sensors
-    }
-
+    return title_text, sensors
 
 # ---------------------------------------------------------
 # Основной pipeline → Excel
@@ -89,22 +71,19 @@ def process_image_to_excel(cfg: dict):
     output_dir.mkdir(parents=True, exist_ok=True)
     excel_path = output_dir / excel_name
 
+    color_ranges = cfg["colors"]
+
     results = []
 
     for img_path in input_dir.glob("*.png"):
         name = img_path.name
-
         img = cv2.imread(str(img_path))
+        
         if img is None:
             print(f"Не могу прочитать файл {name}")
             continue
 
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        res = process_single_image(img_rgb, cfg_path="configs/config.yaml")
-        
-        title_text = res["title"]
-        sensors = res["sensors"]
+        title_text, sensors = process_single_image(img, color_ranges)
 
         for sen in sensors:
             results.append({
