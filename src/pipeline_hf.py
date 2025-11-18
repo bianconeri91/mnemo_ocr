@@ -21,8 +21,8 @@ def process_single_image(img: np.ndarray, cfg_path: str | Path = "configs/config
     color_ranges = []
 
     for key, rng in color_ranges_cfg.items():
-        lo = np.array(rng["from"], dtype=np.uint8)
-        hi = np.array(rng["to"], dtype=np.uint8)
+        lo = np.array(rng[0], dtype=np.uint8)
+        hi = np.array(rng[1], dtype=np.uint8)
         color_ranges.append((lo, hi))
 
     # ---------- 1. Оцифровка титула ----------
