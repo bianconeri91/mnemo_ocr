@@ -31,18 +31,20 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
         mask = cur if mask is None else cv2.bitwise_or(mask, cur)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    print("Contours found:", len(contours)) # для отладки
 
     rois, positions = [], []
     for cnt in contours:
         x, y, ww, hh = cv2.boundingRect(cnt)
+        print("Contour bbox:", x, y, ww, hh) # для отладки
         if ww < 90 or hh < 17:
             continue
-
+        print("ROI accepted:", ww, hh) # для отладки
         hh_clamped = min(hh, 17)
         roi = img[y:y + hh_clamped, x:x + ww]
         rois.append(roi)
         positions.append((x, y, ww, hh))
-        print(rois) # для отладки
+        print("ROIs after filtering:", len(rois)) # для отладки
 
     # ---------- 3. OCR сенсоров ----------
     sensors = []
