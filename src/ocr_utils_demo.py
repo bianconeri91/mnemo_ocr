@@ -14,7 +14,7 @@ _reader_title = easyocr.Reader(['en'], gpu=False)
 # --------------------------
 # OCR титула (EasyOCR)
 # --------------------------
-def ocr_title(img: np.ndarray) -> str:
+def ocr_title(img: np.ndarray):
     """
     OCR верхней области (титул мнемосхемы).
     """
@@ -49,26 +49,36 @@ paddle_ocr = PaddleOCR(
 )
 
 
-def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
+def ocr_sensors(rois: list[np.ndarray]):
     """
     OCR областей сенсоров через PaddleOCR.predict().
     Формат вывода:
         [{"text": str, "score": float}, ...]
     """
     results = []
-    rois = []
 
     if not rois:
-        return results
+        return []
 
     for roi in rois:
         try:
-            result = paddle_ocr.ocr(roi)
-            print(result) # для отладки
+            ocr_res = paddle_ocr.ocr(roi, det=False, cls=False)
+            print(ocr_res) # для отладки
         except Exception as e:
             print(f"⚠ Ошибка OCR.ocr: {e}")
-            return [{"text": "?", "score": 0.0} for _ in rois]
-    results.append(result)
+            results.append({"text": "?", "score": 0.0})
+            continue
+
+        if not ocr_res or not ocr_res[0]:
+            results.append({"text": "?", "score": 0.0})
+            continue
+        
+        text, score = ocr_res[0][1]
+
+        results.append({
+            "text": text,
+            "score": float(score)
+        })
 
     return results
 

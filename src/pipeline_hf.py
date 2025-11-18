@@ -57,8 +57,8 @@ def process_single_image(img: np.ndarray, color_ranges: dict):
 
         for (x, y, ww, hh), result in zip(positions, ocr_results):
             sensors.append({
-                "text": result[0],
-                "score": result[1],
+                "text": result["text"],
+                "score": result["score"],
                 "x": x,
                 "y": y,
                 "w": ww,
