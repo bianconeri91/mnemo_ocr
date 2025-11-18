@@ -1,14 +1,3 @@
-import pytesseract
-
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-
-# Debug
-import os
-print("which tesseract:", os.popen("which tesseract").read())
-print("version:", os.popen("tesseract --version").read())
-
-
-
 import gradio as gr
 import numpy as np
 import cv2
