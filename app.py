@@ -74,8 +74,8 @@ demo = gr.Interface(
     outputs=[
         gr.Image(label="Detected sensors"),
         gr.Textbox(label="Title"),
-        gr.Dataframe(label="Recognized sensors"),
-        gr.File(label="Download Excel")
+        gr.File(label="Download Excel"),
+        gr.Dataframe(label="Recognized sensors")
     ],
     title="MNEMO OCR — HF Demo",
     description="Продовая демо-версия оцифровщика MNEMO."
