@@ -1,3 +1,10 @@
+---
+title: Mnemo OCR
+sdk: docker
+app_port: 7860
+---
+
+
 # 🧠 Mnemo OCR
 
 OCR-pipeline для распознавания текстовой информации с технических схем и мнемосхем на базе **PaddleOCR**.
