@@ -3,7 +3,7 @@ pandas==2.2.3
 pillow==10.4.0
 opencv-python-headless==4.9.0.80
 
-paddlepaddle==2.6.1
+paddlepaddle==2.6.2
 paddleocr==2.6.1.0
 
 gradio==3.41.2
