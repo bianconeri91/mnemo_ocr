@@ -1,13 +1,19 @@
----
-sdk: docker
-app_port: 7860
----
-title: MNEMO OCR Demo
-emoji: 🔍
-sdk: gradio
-sdk_version: 3.41.2
-app_file: app.py
-pinned: false
+# 🧠 Mnemo OCR
+
+OCR-pipeline для распознавания текстовой информации с технических схем и мнемосхем на базе **PaddleOCR**.
+
+Проект развернут как Hugging Face Space и поддерживает полностью оффлайн-инференс (без загрузки моделей из внешних источников во время выполнения).
+
+🔗 Hugging Face Space:  
+https://huggingface.co/spaces/Gayk/mnemo_ocr
+
 ---
 
-Production-like demo of sensor digitization pipeline.
+## 🚀 Возможности
+
+- 📄 Распознавание заголовков и обозначений  
+- 🧭 Детекция и распознавание сенсоров  
+- 🏷 Работа с позиционными кодами  
+- ⚙ Использование локальных моделей PaddleOCR  
+- 🔒 Отсутствие внешних сетевых запросов при запуске  
+- 🐳 Готовность к запуску в контейнере (HF Spaces / Docker)  
