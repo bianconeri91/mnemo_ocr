@@ -1,4 +1,7 @@
 ---
+sdk: docker
+app_port: 7860
+---
 title: MNEMO OCR Demo
 emoji: 🔍
 sdk: gradio
