@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from unittest.mock import patch
 
-from src.ocr_utils import ocr_title, ocr_sensors
+from src.ocr_utils import ocr_title, ocr_sensors, ocr_full_image
 
 @patch("src.ocr_utils.pytesseract.image_to_string")
 def test_ocr_title_basic(mock_tesseract):
@@ -48,3 +48,33 @@ def test_ocr_sensors_empty_roi(mock_predict):
 
     assert out[0]["text"] == ""
     assert out[0]["score"] == 0
+
+
+@patch("src.ocr_utils.paddle_ocr.predict")
+def test_ocr_full_image_multiple_texts(mock_predict):
+    raw_result = [
+        [[[0, 0], [1, 0], [1, 1], [0, 1]], ("TEXT1", 0.91)],
+        [[[0, 2], [1, 2], [1, 3], [0, 3]], ("TEXT2", 0.82)],
+    ]
+    mock_predict.return_value = raw_result
+
+    img = np.zeros((20, 60, 3), dtype=np.uint8)
+
+    out = ocr_full_image(img)
+
+    assert out == raw_result
+    mock_predict.assert_called_once()
+
+
+@patch("src.ocr_utils.paddle_ocr.predict")
+def test_ocr_full_image_dict_format(mock_predict):
+    raw_result = [
+        {"rec_texts": ["A", "B"], "rec_scores": [0.9, 0.8]}
+    ]
+    mock_predict.return_value = raw_result
+
+    img = np.zeros((20, 60, 3), dtype=np.uint8)
+
+    out = ocr_full_image(img)
+
+    assert out == raw_result
