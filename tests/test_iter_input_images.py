@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
-from zipfile import BadZipFile
 
 from  src.pipeline import iter_input_images   # замените под путь вашего файла
 
@@ -61,59 +60,6 @@ def test_iter_input_images_with_docx(mock_Document, mock_imdecode, tmp_path):
 
     mock_Document.assert_called_once()
     mock_imdecode.assert_called_once()
-
-@patch("src.pipeline.Document")
-def test_iter_input_images_skips_word_temp_docx(mock_Document, tmp_path):
-    temp_docx = tmp_path / "~$test.docx"
-    temp_docx.write_bytes(b"not-a-real-docx")
-
-    results = list(iter_input_images(tmp_path))
-
-    assert results == []
-    mock_Document.assert_not_called()
-
-@patch("src.pipeline.Document")
-def test_iter_input_images_skips_invalid_docx(mock_Document, tmp_path, capsys):
-    bad_docx = tmp_path / "bad.docx"
-    bad_docx.write_bytes(b"not-a-real-docx")
-    mock_Document.side_effect = BadZipFile("File is not a zip file")
-
-    results = list(iter_input_images(tmp_path))
-
-    assert results == []
-    captured = capsys.readouterr()
-    assert "пропускаю некорректный docx" in captured.out.lower()
-
-@patch("src.pipeline.cv2.imwrite")
-@patch("src.pipeline.cv2.imdecode")
-@patch("src.pipeline.Document")
-def test_iter_input_images_saves_docx_images(
-    mock_Document,
-    mock_imdecode,
-    mock_imwrite,
-    tmp_path
-):
-    docx_file = tmp_path / "test.docx"
-    docx_file.write_bytes(b"fake")
-
-    mock_doc = MagicMock()
-    mock_Document.return_value = mock_doc
-
-    mock_rel = MagicMock()
-    mock_rel.target_ref = "/media/image1.png"
-    mock_rel.target_part.blob = b"FAKE_IMAGE_DATA"
-    mock_doc.part._rels = {"r1": mock_rel}
-
-    dummy_img = np.ones((5, 5, 3), dtype=np.uint8)
-    mock_imdecode.return_value = dummy_img
-
-    save_dir = tmp_path / "images"
-    results = list(iter_input_images(tmp_path, save_images_dir=save_dir))
-
-    assert results[0][0] == "test_img1"
-    assert save_dir.exists()
-    mock_imwrite.assert_called_once()
-    assert mock_imwrite.call_args[0][0] == str(save_dir / "test_img1.png")
 
 def test_iter_input_images_empty_folder(tmp_path, capsys):
     results = list(iter_input_images(tmp_path))

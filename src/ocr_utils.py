@@ -7,9 +7,6 @@ import numpy as np
 from paddleocr import PaddleOCR
 import pytesseract
 
-if not hasattr(np, "int"):
-    np.int = int
-
 
 # --------------------------
 # OCR титула (pytesseract)
@@ -40,55 +37,11 @@ def ocr_title(img: np.ndarray) -> str:
 # --------------------------
 paddle_ocr = PaddleOCR(
     lang="en",
-    ocr_version="PP-OCRv3",
-    use_angle_cls=False,
-    show_log=False
+    ocr_version="PP-OCRv4",
+    use_doc_orientation_classify=False,
+    use_doc_unwarping=False,
+    use_textline_orientation=False
 )
-
-if not hasattr(paddle_ocr, "predict"):
-    paddle_ocr.predict = paddle_ocr.ocr
-
-
-def _normalize_paddle_output(out) -> list[dict]:
-    """
-    Приводит ответ PaddleOCR к формату [{"text": str, "score": float}, ...].
-    Поддерживает словарь из тестов и формат PaddleOCR 2.x.
-    """
-    if isinstance(out, dict):
-        texts = out.get("rec_texts", ["?"])
-        scores = out.get("rec_scores", [0.0])
-
-        if isinstance(texts, str):
-            texts = [texts]
-        if isinstance(scores, (int, float)):
-            scores = [scores]
-
-        return [
-            {"text": text, "score": round(float(score), 2)}
-            for text, score in zip(texts, scores)
-        ]
-
-    if isinstance(out, list) and out:
-        if all(isinstance(line, dict) for line in out):
-            results = []
-            for line in out:
-                results.extend(_normalize_paddle_output(line))
-            return results
-
-        results = []
-        for line in out:
-            if (
-                isinstance(line, list)
-                and len(line) >= 2
-                and isinstance(line[1], tuple)
-            ):
-                text, score = line[1]
-                results.append({"text": text, "score": round(float(score), 2)})
-
-        if results:
-            return results
-
-    return [{"text": "?", "score": 0.0}]
 
 
 def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
@@ -109,25 +62,15 @@ def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:
         return [{"text": "?", "score": 0.0} for _ in rois]
 
     for out in ocr_results:
-        normalized = _normalize_paddle_output(out)
-        if normalized:
-            results.append(normalized[0])
+        
+        texts = out.get("rec_texts", ["?"])
+        scores = out.get("rec_scores", [0.0])
+
+        # --- распаковка ---
+        text = texts[0] if texts else "?"
+        score = scores[0] if scores else 0.0
+
+        results.append({"text": text, "score": round(score, 2)})
 
     return results
 
-
-def ocr_full_image(img: np.ndarray) -> list[dict]:
-    """
-    OCR полного изображения через PaddleOCR.predict().
-    Возвращает сырой результат PaddleOCR без нормализации.
-    """
-    if img is None or img.size == 0:
-        return []
-
-    try:
-        ocr_result = paddle_ocr.predict(img)
-    except Exception as e:
-        print(f"⚠ Ошибка OCR.predict: {e}")
-        return []
-
-    return ocr_result
