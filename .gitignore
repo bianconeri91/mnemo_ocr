@@ -21,6 +21,7 @@ Thumbs.db
 
 # Project outputs & local data
 outputs/
+/input/
 data/*
 !data/sample/
 !data/sample/input/
