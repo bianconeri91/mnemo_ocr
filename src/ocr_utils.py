@@ -35,13 +35,7 @@ def ocr_title(img: np.ndarray) -> str:
 # --------------------------
 # OCR датчиков (PaddleOCR)
 # --------------------------
-paddle_ocr = PaddleOCR(
-    lang="en",
-    ocr_version="PP-OCRv4",
-    use_doc_orientation_classify=False,
-    use_doc_unwarping=False,
-    use_textline_orientation=False
-)
+paddle_ocr = PaddleOCR(lang="en")
 
 
 def ocr_sensors(rois: list[np.ndarray]) -> list[dict]:

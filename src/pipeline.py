@@ -10,6 +10,12 @@ from docx import Document
 
 from src.config_loader import load_config
 from src.ocr_utils import ocr_title, ocr_sensors
+from src.visualization import (
+    build_color_mask,
+    extract_rois,
+    save_mask,
+    save_rois,
+)
 
 
 # ---------------------------------------------------------
@@ -68,7 +74,13 @@ def iter_input_images(input_dir: Path):
 # ---------------------------------------------------------
 # Извлечение текста титула + датчиков
 # ---------------------------------------------------------
-def extract_text(img: np.ndarray, color_ranges: dict) -> tuple[str, list[dict]]:
+def extract_text(
+    img: np.ndarray,
+    color_ranges: dict,
+    image_name: str | None = None,
+    masks_dir: Path | None = None,
+    rois_dir: Path | None = None,
+) -> tuple[str, list[dict]]:
     """
     1. Обрезаем титул (верхняя область)
     2. OCR титула
@@ -82,26 +94,13 @@ def extract_text(img: np.ndarray, color_ranges: dict) -> tuple[str, list[dict]]:
     title_text = ocr_title(title_roi)
 
     # ---------- 2. сенсоры ----------
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = build_color_mask(img, color_ranges)
+    rois, positions = extract_rois(img, mask)
 
-    mask = None
-    for (lo, hi) in color_ranges.values():
-        lo_np = np.array(lo, dtype=np.uint8)
-        hi_np = np.array(hi, dtype=np.uint8)
-        cur = cv2.inRange(hsv, lo_np, hi_np)
-        mask = cur if mask is None else cv2.bitwise_or(mask, cur)
-
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    rois, positions = [], []
-    for cnt in contours:
-        x, y, ww, hh = cv2.boundingRect(cnt)
-        if ww < 90 or hh < 17:
-            continue
-
-        hh = min(hh, 17)
-        rois.append(img[y:y + hh, x:x + ww])
-        positions.append((x, y, ww, hh))
+    if image_name is not None and masks_dir is not None:
+        save_mask(mask, image_name, masks_dir)
+    if image_name is not None and rois_dir is not None:
+        save_rois(rois, positions, image_name, rois_dir)
 
     # ---------- 3. OCR сенсоров ----------
     sensors = []
@@ -131,6 +130,10 @@ def process_all_images_to_excel(cfg: dict):
 
     output_dir.mkdir(parents=True, exist_ok=True)
     excel_path = output_dir / excel_name
+    masks_dir = output_dir / "masks"
+    rois_dir = output_dir / "rois"
+    masks_dir.mkdir(parents=True, exist_ok=True)
+    rois_dir.mkdir(parents=True, exist_ok=True)
 
     # Цветовые диапазоны сенсоров
     color_ranges = cfg["colors"]
@@ -138,7 +141,13 @@ def process_all_images_to_excel(cfg: dict):
     results = []
 
     for name, img in iter_input_images(input_dir):
-        title_text, sensors = extract_text(img, color_ranges)
+        title_text, sensors = extract_text(
+            img,
+            color_ranges,
+            image_name=name,
+            masks_dir=masks_dir,
+            rois_dir=rois_dir,
+        )
 
         for sen in sensors:
             results.append({
@@ -162,5 +171,5 @@ def process_all_images_to_excel(cfg: dict):
 # Запуск
 # ---------------------------------------------------------
 if __name__ == "__main__":
-    cfg = load_config("config.yaml")
+    cfg = load_config("configs/config.yaml")
     process_all_images_to_excel(cfg)
